@@ -1,0 +1,752 @@
+classdef Schimitt_Trigger < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                       matlab.ui.Figure
+        TabGroup                       matlab.ui.container.TabGroup
+        SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab  matlab.ui.container.Tab
+        IMPORTANT_FACTORSPanel         matlab.ui.container.Panel
+        Ltp                            matlab.ui.control.NumericEditField
+        Utp                            matlab.ui.control.NumericEditField
+        MinusVsat                      matlab.ui.control.NumericEditField
+        PlusVsat                       matlab.ui.control.NumericEditField
+        BetaEditField                  matlab.ui.control.NumericEditField
+        TextArea_11                    matlab.ui.control.TextArea
+        TextArea_9                     matlab.ui.control.TextArea
+        TextArea_7                     matlab.ui.control.TextArea
+        TextArea_5                     matlab.ui.control.TextArea
+        TextArea_3                     matlab.ui.control.TextArea
+        TextArea_2                     matlab.ui.control.TextArea
+        TextArea                       matlab.ui.control.TextArea
+        Image                          matlab.ui.control.Image
+        R2EditField                    matlab.ui.control.NumericEditField
+        R2EditFieldLabel               matlab.ui.control.Label
+        R1EditField                    matlab.ui.control.NumericEditField
+        R1EditFieldLabel               matlab.ui.control.Label
+        CONTROLPANELPanel              matlab.ui.container.Panel
+        CALCULATE_TRIP_POINTSButton    matlab.ui.control.Button
+        LOAD_VALUESButton              matlab.ui.control.Button
+        R2Knob                         matlab.ui.control.Knob
+        R2KnobLabel                    matlab.ui.control.Label
+        R1Knob                         matlab.ui.control.Knob
+        R1KnobLabel                    matlab.ui.control.Label
+        VinEditField                   matlab.ui.control.NumericEditField
+        VinEditFieldLabel              matlab.ui.control.Label
+        Lamp                           matlab.ui.control.Lamp
+        LampLabel                      matlab.ui.control.Label
+        VCCEditField_2                 matlab.ui.control.NumericEditField
+        VCCEditField_2Label            matlab.ui.control.Label
+        VCCEditField                   matlab.ui.control.NumericEditField
+        VCCEditFieldLabel              matlab.ui.control.Label
+        Switch                         matlab.ui.control.Switch
+        SwitchLabel                    matlab.ui.control.Label
+        SUPPLY_VOLTSlider              matlab.ui.control.Slider
+        SUPPLY_VOLTSliderLabel         matlab.ui.control.Label
+        NOISE_TRIGGERINGTab            matlab.ui.container.Tab
+        Image3                         matlab.ui.control.Image
+        Image2                         matlab.ui.control.Image
+        RUN_SCHMITT_TRIGGERButton      matlab.ui.control.Button
+        TabGroup2                      matlab.ui.container.TabGroup
+        SQUARE_WAVE_INPUT_SETTINGSTab  matlab.ui.container.Tab
+        Switch3                        matlab.ui.control.Switch
+        Switch3Label                   matlab.ui.control.Label
+        noiseindicatorLamp             matlab.ui.control.Lamp
+        noiseindicatorLampLabel        matlab.ui.control.Label
+        ADD_NOISESwitch                matlab.ui.control.Switch
+        ADD_NOISESwitchLabel           matlab.ui.control.Label
+        SET_INPUTButton                matlab.ui.control.Button
+        ONLamp                         matlab.ui.control.Lamp
+        ONLampLabel                    matlab.ui.control.Label
+        INPUT_TIME_PERIODSlider        matlab.ui.control.Slider
+        INPUT_TIME_PERIODSliderLabel   matlab.ui.control.Label
+        INPUT_VOLTAGESlider            matlab.ui.control.Slider
+        INPUT_VOLTAGESliderLabel       matlab.ui.control.Label
+        COMPARATOR_SETTINGSTab         matlab.ui.container.Tab
+        Threshold_ValueEditField       matlab.ui.control.NumericEditField
+        Threshold_ValueEditFieldLabel  matlab.ui.control.Label
+        RUN_COMPARATORButton           matlab.ui.control.Button
+        THRESHOLD_VOLTAGESlider        matlab.ui.control.Slider
+        THRESHOLD_VOLTAGESliderLabel   matlab.ui.control.Label
+        UIAxes_7                       matlab.ui.control.UIAxes
+        UIAxes_6                       matlab.ui.control.UIAxes
+        UIAxes                         matlab.ui.control.UIAxes
+    end
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Value changed function: Switch
+        function SwitchValueChanged(app, event)
+            value = app.Switch.Value;
+            if strcmp(value, 'On')
+                app.Lamp.Color = 'g';
+            else
+                app.Lamp.Color = [0.5, 0.5, 0.5];  
+            end
+        end
+
+        % Callback function
+        function Switch_4ValueChanged(app, event)
+            value = app.Switch_4.Value;
+            if strcmp(value, 'On')
+                app.Lamp2.Color = 'g';
+            else
+                app.Lamp2.Color = [0.5, 0.5, 0.5]; 
+            end
+        end
+
+        % Value changing function: SUPPLY_VOLTSlider
+        function SUPPLY_VOLTSliderValueChanging(app, event)
+
+            
+        end
+
+        % Value changed function: SUPPLY_VOLTSlider
+        function SUPPLY_VOLTSliderValueChanged(app, event)
+            value = app.Switch.Value;
+            if strcmp(value, 'On')
+                app.VCCEditField.Value = app.SUPPLY_VOLTSlider.Value/2;
+                app.VCCEditField_2.Value = -(app.SUPPLY_VOLTSlider.Value/2);
+                app.PlusVsat.Value = (app.VCCEditField.Value - 2);
+                app.MinusVsat.Value = -(app.VCCEditField.Value - 2);
+            end
+            
+        end
+
+        % Callback function
+        function AmplitudeKnob_3ValueChanged(app, event)
+            value = app.Switch2.Value;
+            if strcmp(value, 'On')
+                app.Display_AmplitudeEditField.Value = app.AmplitudeKnob_3.Value;
+                f = app.FrequencyKnob.Value;
+                A = app.AmplitudeKnob_3.Value;
+                t = 0:0.0001:1;
+                y = A*sin(2*pi*f*t);
+                plot(app.UIAxes_4, y);
+            end
+        end
+
+        % Callback function
+        function FrequencyKnobValueChanged(app, event)
+            value = app.Switch2.Value;
+            if strcmp(value, 'On')
+                app.Display_FrequencyEditField.Value = app.FrequencyKnob.Value;
+                f = app.FrequencyKnob.Value;
+                A = app.AmplitudeKnob_3.Value;
+                t = 0:0.0001:1;
+                y = A*sin(2*pi*f*t);
+                plot(app.UIAxes_4, y);
+            end
+        end
+
+        % Callback function
+        function Range_FrequencyButtonGroupSelectionChanged(app, event)
+            selectedButton = app.Range_FrequencyButtonGroup.SelectedObject;
+            
+        end
+
+        % Button pushed function: LOAD_VALUESButton
+        function LOAD_VALUESButtonPushed(app, event)
+            app.R1EditField.Value = app.R1Knob.Value;
+            app.R2EditField.Value = app.R2Knob.Value;
+            app.BetaEditField.Value = app.R2Knob.Value/(app.R1Knob.Value + app.R2Knob.Value);
+        end
+
+        % Button pushed function: CALCULATE_TRIP_POINTSButton
+        function CALCULATE_TRIP_POINTSButtonPushed(app, event)
+            app.Utp.Value = app.PlusVsat.Value*app.BetaEditField.Value;
+            app.Ltp.Value = app.MinusVsat.Value*app.BetaEditField.Value;
+        end
+
+        % Value changed function: Switch3
+        function Switch3ValueChanged(app, event)
+            value = app.Switch3.Value;
+            if strcmp(value, 'On')
+               app.ONLamp.Color = 'g';
+            else
+               app.ONLamp.Color = [0.5, 0.5, 0.5]; 
+            end
+        end
+
+        % Button pushed function: SET_INPUTButton
+        function SET_INPUTButtonPushed(app, event)
+            value = app.Switch3.Value;
+            if strcmp(value, 'On')
+               A = app.INPUT_VOLTAGESlider.Value;
+               T = app.INPUT_TIME_PERIODSlider.Value;
+               t = 0:0.01:10;
+               fsq = 1/T;
+               y = A*square(2*pi*fsq*t);
+               app.VinEditField.Value = A;
+            elseif strcmp(value, 'Off')
+                y = [];
+                for t = 0:0.01:10
+                    y(end + 1) = 0;
+                end
+            end
+            plot(app.UIAxes, t, y);
+        end
+
+        % Value changed function: ADD_NOISESwitch
+        function ADD_NOISESwitchValueChanged(app, event)
+            value = app.ADD_NOISESwitch.Value;
+            value3 = app.Switch3.Value;
+            if strcmp(value3, 'On')
+                if strcmp(value, 'Add')
+                    app.noiseindicatorLamp.Color = 'r';
+                    A = app.INPUT_VOLTAGESlider.Value;
+                    T = app.INPUT_TIME_PERIODSlider.Value;
+                    t1 = 0:0.01:10;
+                    fsq = 1/T;
+                    xmin = -2;
+                    xmax = 2;
+                    n = ((1/0.01)*10) + 1;
+                    x = xmin+rand(1,n)*(xmax-xmin);
+                    y = A*square(2*pi*fsq*t1) + x;
+                elseif strcmp(value, 'Remove')
+                    app.noiseindicatorLamp.Color = [0.5, 0.5, 0.5];
+                    A = app.INPUT_VOLTAGESlider.Value;
+                    T = app.INPUT_TIME_PERIODSlider.Value;
+                    t1 = 0:0.01:10;
+                    fsq = 1/T;
+                    y = A*square(2*pi*fsq*t1);
+                end
+               plot(app.UIAxes, t1, y); 
+            end
+        end
+
+        % Button pushed function: RUN_COMPARATORButton
+        function RUN_COMPARATORButtonPushed(app, event)
+            value = app.ADD_NOISESwitch.Value;
+            Thr = app.THRESHOLD_VOLTAGESlider.Value;
+            app.Threshold_ValueEditField.Value = app.THRESHOLD_VOLTAGESlider.Value;
+            if strcmp(value, 'Add')
+                    app.noiseindicatorLamp.Color = 'r';
+                    A = app.INPUT_VOLTAGESlider.Value;
+                    T = app.INPUT_TIME_PERIODSlider.Value;
+                    t1 = 0:0.01:10;
+                    fsq = 1/T;
+                    xmin = -2;
+                    xmax = 2;
+                    n = ((1/0.01)*10) + 1;
+                    x = xmin+rand(1,n)*(xmax-xmin);
+                    y = A*square(2*pi*fsq*t1) + x;
+                    
+                    op = [];
+                    for i = 1:1:length(t1)
+                        if (y(i) > Thr)
+                            op(end + 1) = app.MinusVsat.Value;
+                        else 
+                            op(end + 1) = app.PlusVsat.Value;
+                        end
+                    end  
+                    
+                elseif strcmp(value, 'Remove')
+                    app.noiseindicatorLamp.Color = [0.5, 0.5, 0.5];
+                    A = app.INPUT_VOLTAGESlider.Value;
+                    T = app.INPUT_TIME_PERIODSlider.Value;
+                    t1 = 0:0.01:10;
+                    fsq = 1/T;
+                    y = A*square(2*pi*fsq*t1);
+                    
+                    op = [];
+                    for i = 1:1:length(t1)
+                        if (y(i) > Thr)
+                            op(end + 1) = app.MinusVsat.Value;
+                        else 
+                            op(end + 1) = app.PlusVsat.Value;
+                        end
+                    end    
+                    
+                end
+               plot(app.UIAxes_6, t1, op); 
+        end
+
+        % Button pushed function: RUN_SCHMITT_TRIGGERButton
+        function RUN_SCHMITT_TRIGGERButtonPushed(app, event)
+            value = app.ADD_NOISESwitch.Value;
+            utp = app.Utp.Value;
+            ltp = app.Ltp.Value;
+            if strcmp(value, 'Add')
+                    app.noiseindicatorLamp.Color = 'r';
+                     A = app.INPUT_VOLTAGESlider.Value;
+                    T = app.INPUT_TIME_PERIODSlider.Value;
+                    t1 = 0:0.01:10;
+                    fsq = 1/T;
+                    y = A*square(2*pi*fsq*t1);
+                    
+                    op = [];
+                    for i = 1:1:length(t1)
+                        if (y(i) > utp)
+                            op(end + 1) = app.MinusVsat.Value;
+                        elseif (y(i) < ltp) 
+                            op(end + 1) = app.PlusVsat.Value;
+                        else
+                            op(end + 1) = op(end);
+                        end
+                    end 
+                    
+                elseif strcmp(value, 'Remove')
+                    app.noiseindicatorLamp.Color = [0.5, 0.5, 0.5];
+                    A = app.INPUT_VOLTAGESlider.Value;
+                    T = app.INPUT_TIME_PERIODSlider.Value;
+                    t1 = 0:0.01:10;
+                    fsq = 1/T;
+                    y = A*square(2*pi*fsq*t1);
+                    
+                    op = [];
+                    for i = 1:1:length(t1)
+                        if (y(i) > utp)
+                            op(end + 1) = app.MinusVsat.Value;
+                        elseif (y(i) < ltp) 
+                            op(end + 1) = app.PlusVsat.Value;
+                        else
+                            op(end + 1) = op(end);
+                        end
+                    end    
+                    
+                end
+               plot(app.UIAxes_7, t1, op);
+        end
+
+        % Callback function
+        function Switch2ValueChanged(app, event)
+            value = app.Switch2.Value;
+             if strcmp(value, 'On')
+               app.Lamp2.Color = 'g';
+            else
+               app.Lamp2.Color = [0.5, 0.5, 0.5]; 
+            end
+        end
+
+        % Callback function
+        function DISPLAYOUTPUTButtonPushed(app, event)
+                    value = app.Switch2.Value;
+                   if strcmp(value, 'On')
+                    utp = app.Utp.Value;
+                    ltp = app.Ltp.Value;
+                   f = app.FrequencyKnob.Value;
+                   A = app.AmplitudeKnob_3.Value;
+                   t = 0:0.01:10;
+                   y = A*sin(2*pi*f*t);
+                    
+                    op = [];
+                    for i = 1:1:length(t)
+                        if (y(i) > utp)
+                            op(end + 1) = app.MinusVsat.Value;
+                        elseif (y(i) < ltp) 
+                            op(end + 1) = app.PlusVsat.Value;
+                        elseif (y(i) > ltp)
+                            if (op(end) == app.PlusVsat.Value)
+                                op(end + 1) = app.PlusVsat.Value;
+                            else
+                                op(end + 1) = app.MinusVsat.Value;
+                            end
+                        elseif (y(i) < utp)
+                            if (op(end) == app.PlusVsat.Value)
+                                op(end + 1) = app.PlusVsat.Value;
+                            else
+                                op(end + 1) = app.MinusVsat.Value;
+                            end
+                        end
+                    end 
+                   end
+           plot(app.UIAxes_3, t, op);         
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 919 707];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create TabGroup
+            app.TabGroup = uitabgroup(app.UIFigure);
+            app.TabGroup.Position = [5 -10 911 629];
+
+            % Create SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab
+            app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab = uitab(app.TabGroup);
+            app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab.Title = 'SCHMITT_TROGGER_CIRCUIT_SETTINGS';
+
+            % Create CONTROLPANELPanel
+            app.CONTROLPANELPanel = uipanel(app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab);
+            app.CONTROLPANELPanel.Title = 'CONTROL PANEL';
+            app.CONTROLPANELPanel.Position = [18 154 379 434];
+
+            % Create SUPPLY_VOLTSliderLabel
+            app.SUPPLY_VOLTSliderLabel = uilabel(app.CONTROLPANELPanel);
+            app.SUPPLY_VOLTSliderLabel.HorizontalAlignment = 'right';
+            app.SUPPLY_VOLTSliderLabel.Position = [12 74 89 43];
+            app.SUPPLY_VOLTSliderLabel.Text = 'SUPPLY_VOLT';
+
+            % Create SUPPLY_VOLTSlider
+            app.SUPPLY_VOLTSlider = uislider(app.CONTROLPANELPanel);
+            app.SUPPLY_VOLTSlider.MajorTicks = [0 10 20 30 40 50 60 70 80 90 100];
+            app.SUPPLY_VOLTSlider.ValueChangedFcn = createCallbackFcn(app, @SUPPLY_VOLTSliderValueChanged, true);
+            app.SUPPLY_VOLTSlider.ValueChangingFcn = createCallbackFcn(app, @SUPPLY_VOLTSliderValueChanging, true);
+            app.SUPPLY_VOLTSlider.Position = [112 104 245 3];
+
+            % Create SwitchLabel
+            app.SwitchLabel = uilabel(app.CONTROLPANELPanel);
+            app.SwitchLabel.HorizontalAlignment = 'center';
+            app.SwitchLabel.Position = [23 363 41 22];
+            app.SwitchLabel.Text = 'Switch';
+
+            % Create Switch
+            app.Switch = uiswitch(app.CONTROLPANELPanel, 'slider');
+            app.Switch.ValueChangedFcn = createCallbackFcn(app, @SwitchValueChanged, true);
+            app.Switch.Position = [94 359 68 30];
+
+            % Create VCCEditFieldLabel
+            app.VCCEditFieldLabel = uilabel(app.CONTROLPANELPanel);
+            app.VCCEditFieldLabel.HorizontalAlignment = 'right';
+            app.VCCEditFieldLabel.Position = [239 377 38 22];
+            app.VCCEditFieldLabel.Text = '+VCC';
+
+            % Create VCCEditField
+            app.VCCEditField = uieditfield(app.CONTROLPANELPanel, 'numeric');
+            app.VCCEditField.Position = [283 375 89 22];
+
+            % Create VCCEditField_2Label
+            app.VCCEditField_2Label = uilabel(app.CONTROLPANELPanel);
+            app.VCCEditField_2Label.HorizontalAlignment = 'right';
+            app.VCCEditField_2Label.Position = [239 343 35 22];
+            app.VCCEditField_2Label.Text = '-VCC';
+
+            % Create VCCEditField_2
+            app.VCCEditField_2 = uieditfield(app.CONTROLPANELPanel, 'numeric');
+            app.VCCEditField_2.Position = [280 341 92 22];
+
+            % Create LampLabel
+            app.LampLabel = uilabel(app.CONTROLPANELPanel);
+            app.LampLabel.HorizontalAlignment = 'right';
+            app.LampLabel.Position = [22 321 36 22];
+            app.LampLabel.Text = 'Lamp';
+
+            % Create Lamp
+            app.Lamp = uilamp(app.CONTROLPANELPanel);
+            app.Lamp.Position = [73 321 20 20];
+            app.Lamp.Color = [0.502 0.502 0.502];
+
+            % Create VinEditFieldLabel
+            app.VinEditFieldLabel = uilabel(app.CONTROLPANELPanel);
+            app.VinEditFieldLabel.HorizontalAlignment = 'right';
+            app.VinEditFieldLabel.Position = [249 255 25 22];
+            app.VinEditFieldLabel.Text = 'Vin';
+
+            % Create VinEditField
+            app.VinEditField = uieditfield(app.CONTROLPANELPanel, 'numeric');
+            app.VinEditField.Position = [280 253 92 22];
+
+            % Create R1KnobLabel
+            app.R1KnobLabel = uilabel(app.CONTROLPANELPanel);
+            app.R1KnobLabel.HorizontalAlignment = 'center';
+            app.R1KnobLabel.Position = [47.5 181 25 22];
+            app.R1KnobLabel.Text = 'R1';
+
+            % Create R1Knob
+            app.R1Knob = uiknob(app.CONTROLPANELPanel, 'continuous');
+            app.R1Knob.MajorTicks = [0 10 20 30 40 50 60 70 80 90 100];
+            app.R1Knob.Position = [38 237 44 44];
+
+            % Create R2KnobLabel
+            app.R2KnobLabel = uilabel(app.CONTROLPANELPanel);
+            app.R2KnobLabel.HorizontalAlignment = 'center';
+            app.R2KnobLabel.Position = [158.5 181 25 22];
+            app.R2KnobLabel.Text = 'R2';
+
+            % Create R2Knob
+            app.R2Knob = uiknob(app.CONTROLPANELPanel, 'continuous');
+            app.R2Knob.MajorTicks = [0 10 20 30 40 50 60 70 80 90 100];
+            app.R2Knob.Position = [149 237 44 44];
+
+            % Create LOAD_VALUESButton
+            app.LOAD_VALUESButton = uibutton(app.CONTROLPANELPanel, 'push');
+            app.LOAD_VALUESButton.ButtonPushedFcn = createCallbackFcn(app, @LOAD_VALUESButtonPushed, true);
+            app.LOAD_VALUESButton.Position = [16 143 101 22];
+            app.LOAD_VALUESButton.Text = 'LOAD_VALUES';
+
+            % Create CALCULATE_TRIP_POINTSButton
+            app.CALCULATE_TRIP_POINTSButton = uibutton(app.CONTROLPANELPanel, 'push');
+            app.CALCULATE_TRIP_POINTSButton.ButtonPushedFcn = createCallbackFcn(app, @CALCULATE_TRIP_POINTSButtonPushed, true);
+            app.CALCULATE_TRIP_POINTSButton.Position = [16 16 171 22];
+            app.CALCULATE_TRIP_POINTSButton.Text = 'CALCULATE_TRIP_POINTS';
+
+            % Create R1EditFieldLabel
+            app.R1EditFieldLabel = uilabel(app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab);
+            app.R1EditFieldLabel.HorizontalAlignment = 'right';
+            app.R1EditFieldLabel.Position = [711 495 25 22];
+            app.R1EditFieldLabel.Text = 'R1';
+
+            % Create R1EditField
+            app.R1EditField = uieditfield(app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab, 'numeric');
+            app.R1EditField.Position = [745 495 100 22];
+
+            % Create R2EditFieldLabel
+            app.R2EditFieldLabel = uilabel(app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab);
+            app.R2EditFieldLabel.HorizontalAlignment = 'right';
+            app.R2EditFieldLabel.Position = [711 427 25 22];
+            app.R2EditFieldLabel.Text = 'R2';
+
+            % Create R2EditField
+            app.R2EditField = uieditfield(app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab, 'numeric');
+            app.R2EditField.Position = [745 427 100 22];
+
+            % Create Image
+            app.Image = uiimage(app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab);
+            app.Image.Position = [400 336 312 269];
+            app.Image.ImageSource = 'stf_1.png';
+
+            % Create IMPORTANT_FACTORSPanel
+            app.IMPORTANT_FACTORSPanel = uipanel(app.SCHMITT_TRIGGER_CIRCUIT_SETTINGSTab);
+            app.IMPORTANT_FACTORSPanel.Title = 'IMPORTANT_FACTORS';
+            app.IMPORTANT_FACTORSPanel.Position = [400 201 262 136];
+
+            % Create TextArea
+            app.TextArea = uitextarea(app.IMPORTANT_FACTORSPanel);
+            app.TextArea.Position = [1 93 130 20];
+            app.TextArea.Value = {'PARAMETERS'};
+
+            % Create TextArea_2
+            app.TextArea_2 = uitextarea(app.IMPORTANT_FACTORSPanel);
+            app.TextArea_2.Position = [130 93 130 20];
+            app.TextArea_2.Value = {'VALUES'};
+
+            % Create TextArea_3
+            app.TextArea_3 = uitextarea(app.IMPORTANT_FACTORSPanel);
+            app.TextArea_3.Position = [1 74 130 20];
+            app.TextArea_3.Value = {'Beta'};
+
+            % Create TextArea_5
+            app.TextArea_5 = uitextarea(app.IMPORTANT_FACTORSPanel);
+            app.TextArea_5.Position = [1 55 130 20];
+            app.TextArea_5.Value = {'+Vsat'};
+
+            % Create TextArea_7
+            app.TextArea_7 = uitextarea(app.IMPORTANT_FACTORSPanel);
+            app.TextArea_7.Position = [1 38 130 20];
+            app.TextArea_7.Value = {'-Vsat'};
+
+            % Create TextArea_9
+            app.TextArea_9 = uitextarea(app.IMPORTANT_FACTORSPanel);
+            app.TextArea_9.Position = [1 19 130 20];
+            app.TextArea_9.Value = {'UTP'};
+
+            % Create TextArea_11
+            app.TextArea_11 = uitextarea(app.IMPORTANT_FACTORSPanel);
+            app.TextArea_11.Position = [1 0 130 20];
+            app.TextArea_11.Value = {'LTP'};
+
+            % Create BetaEditField
+            app.BetaEditField = uieditfield(app.IMPORTANT_FACTORSPanel, 'numeric');
+            app.BetaEditField.Position = [129 74 130 20];
+
+            % Create PlusVsat
+            app.PlusVsat = uieditfield(app.IMPORTANT_FACTORSPanel, 'numeric');
+            app.PlusVsat.Position = [129 55 130 20];
+
+            % Create MinusVsat
+            app.MinusVsat = uieditfield(app.IMPORTANT_FACTORSPanel, 'numeric');
+            app.MinusVsat.Position = [129 36 130 20];
+
+            % Create Utp
+            app.Utp = uieditfield(app.IMPORTANT_FACTORSPanel, 'numeric');
+            app.Utp.Position = [129 19 130 20];
+
+            % Create Ltp
+            app.Ltp = uieditfield(app.IMPORTANT_FACTORSPanel, 'numeric');
+            app.Ltp.Position = [129 1 130 20];
+
+            % Create NOISE_TRIGGERINGTab
+            app.NOISE_TRIGGERINGTab = uitab(app.TabGroup);
+            app.NOISE_TRIGGERINGTab.Title = 'NOISE_TRIGGERING';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.NOISE_TRIGGERINGTab);
+            title(app.UIAxes, 'INPUT WAVEFORM')
+            xlabel(app.UIAxes, 'TIME')
+            ylabel(app.UIAxes, 'AMPLITUDE')
+            app.UIAxes.Position = [445 405 454 192];
+
+            % Create UIAxes_6
+            app.UIAxes_6 = uiaxes(app.NOISE_TRIGGERINGTab);
+            title(app.UIAxes_6, 'COMPARATOR OUTPUT WAVEFORM')
+            xlabel(app.UIAxes_6, 'TIME')
+            ylabel(app.UIAxes_6, 'AMPLITUDE')
+            app.UIAxes_6.Position = [445 202 454 185];
+
+            % Create UIAxes_7
+            app.UIAxes_7 = uiaxes(app.NOISE_TRIGGERINGTab);
+            title(app.UIAxes_7, 'SCHIMITT TRIGGER OUTPUT WAVEFORM')
+            xlabel(app.UIAxes_7, 'TIME')
+            ylabel(app.UIAxes_7, 'AMPLITUDE')
+            app.UIAxes_7.Position = [445 8 454 185];
+
+            % Create TabGroup2
+            app.TabGroup2 = uitabgroup(app.NOISE_TRIGGERINGTab);
+            app.TabGroup2.Position = [1 391 434 213];
+
+            % Create SQUARE_WAVE_INPUT_SETTINGSTab
+            app.SQUARE_WAVE_INPUT_SETTINGSTab = uitab(app.TabGroup2);
+            app.SQUARE_WAVE_INPUT_SETTINGSTab.Title = 'SQUARE_WAVE_INPUT_SETTINGS';
+
+            % Create INPUT_VOLTAGESliderLabel
+            app.INPUT_VOLTAGESliderLabel = uilabel(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.INPUT_VOLTAGESliderLabel.HorizontalAlignment = 'right';
+            app.INPUT_VOLTAGESliderLabel.Position = [4 140 103 43];
+            app.INPUT_VOLTAGESliderLabel.Text = 'INPUT_VOLTAGE';
+
+            % Create INPUT_VOLTAGESlider
+            app.INPUT_VOLTAGESlider = uislider(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.INPUT_VOLTAGESlider.Limits = [0 10];
+            app.INPUT_VOLTAGESlider.MajorTicks = [0 1 2 3 4 5 6 7 8 9 10];
+            app.INPUT_VOLTAGESlider.Position = [118 170 245 3];
+
+            % Create INPUT_TIME_PERIODSliderLabel
+            app.INPUT_TIME_PERIODSliderLabel = uilabel(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.INPUT_TIME_PERIODSliderLabel.HorizontalAlignment = 'right';
+            app.INPUT_TIME_PERIODSliderLabel.Position = [4 89 130 43];
+            app.INPUT_TIME_PERIODSliderLabel.Text = 'INPUT_TIME_PERIOD';
+
+            % Create INPUT_TIME_PERIODSlider
+            app.INPUT_TIME_PERIODSlider = uislider(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.INPUT_TIME_PERIODSlider.Limits = [0 10];
+            app.INPUT_TIME_PERIODSlider.MajorTicks = [0 1 2 3 4 5 6 7 8 9 10];
+            app.INPUT_TIME_PERIODSlider.Position = [145 119 245 3];
+
+            % Create ONLampLabel
+            app.ONLampLabel = uilabel(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.ONLampLabel.HorizontalAlignment = 'center';
+            app.ONLampLabel.Position = [25 67 25 22];
+            app.ONLampLabel.Text = 'ON';
+
+            % Create ONLamp
+            app.ONLamp = uilamp(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.ONLamp.Position = [65 67 20 20];
+            app.ONLamp.Color = [0.502 0.502 0.502];
+
+            % Create SET_INPUTButton
+            app.SET_INPUTButton = uibutton(app.SQUARE_WAVE_INPUT_SETTINGSTab, 'push');
+            app.SET_INPUTButton.ButtonPushedFcn = createCallbackFcn(app, @SET_INPUTButtonPushed, true);
+            app.SET_INPUTButton.Position = [101 61 100 22];
+            app.SET_INPUTButton.Text = 'SET_INPUT';
+
+            % Create ADD_NOISESwitchLabel
+            app.ADD_NOISESwitchLabel = uilabel(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.ADD_NOISESwitchLabel.HorizontalAlignment = 'center';
+            app.ADD_NOISESwitchLabel.Position = [237 18 75 22];
+            app.ADD_NOISESwitchLabel.Text = 'ADD_NOISE';
+
+            % Create ADD_NOISESwitch
+            app.ADD_NOISESwitch = uiswitch(app.SQUARE_WAVE_INPUT_SETTINGSTab, 'slider');
+            app.ADD_NOISESwitch.Items = {'Remove', 'Add'};
+            app.ADD_NOISESwitch.ValueChangedFcn = createCallbackFcn(app, @ADD_NOISESwitchValueChanged, true);
+            app.ADD_NOISESwitch.Position = [264 55 45 20];
+            app.ADD_NOISESwitch.Value = 'Remove';
+
+            % Create noiseindicatorLampLabel
+            app.noiseindicatorLampLabel = uilabel(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.noiseindicatorLampLabel.HorizontalAlignment = 'right';
+            app.noiseindicatorLampLabel.Position = [341 30 80 22];
+            app.noiseindicatorLampLabel.Text = 'noiseindicator';
+
+            % Create noiseindicatorLamp
+            app.noiseindicatorLamp = uilamp(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.noiseindicatorLamp.Position = [369 7 20 20];
+            app.noiseindicatorLamp.Color = [0.502 0.502 0.502];
+
+            % Create Switch3Label
+            app.Switch3Label = uilabel(app.SQUARE_WAVE_INPUT_SETTINGSTab);
+            app.Switch3Label.HorizontalAlignment = 'center';
+            app.Switch3Label.Position = [25 6 48 22];
+            app.Switch3Label.Text = 'Switch3';
+
+            % Create Switch3
+            app.Switch3 = uiswitch(app.SQUARE_WAVE_INPUT_SETTINGSTab, 'slider');
+            app.Switch3.ValueChangedFcn = createCallbackFcn(app, @Switch3ValueChanged, true);
+            app.Switch3.Position = [28 43 42 19];
+
+            % Create COMPARATOR_SETTINGSTab
+            app.COMPARATOR_SETTINGSTab = uitab(app.TabGroup2);
+            app.COMPARATOR_SETTINGSTab.Title = 'COMPARATOR_SETTINGS';
+
+            % Create THRESHOLD_VOLTAGESliderLabel
+            app.THRESHOLD_VOLTAGESliderLabel = uilabel(app.COMPARATOR_SETTINGSTab);
+            app.THRESHOLD_VOLTAGESliderLabel.HorizontalAlignment = 'right';
+            app.THRESHOLD_VOLTAGESliderLabel.Position = [0 125 141 43];
+            app.THRESHOLD_VOLTAGESliderLabel.Text = 'THRESHOLD_VOLTAGE';
+
+            % Create THRESHOLD_VOLTAGESlider
+            app.THRESHOLD_VOLTAGESlider = uislider(app.COMPARATOR_SETTINGSTab);
+            app.THRESHOLD_VOLTAGESlider.Limits = [0 10];
+            app.THRESHOLD_VOLTAGESlider.MajorTicks = [0 1 2 3 4 5 6 7 8 9 10];
+            app.THRESHOLD_VOLTAGESlider.Position = [152 155 245 3];
+
+            % Create RUN_COMPARATORButton
+            app.RUN_COMPARATORButton = uibutton(app.COMPARATOR_SETTINGSTab, 'push');
+            app.RUN_COMPARATORButton.ButtonPushedFcn = createCallbackFcn(app, @RUN_COMPARATORButtonPushed, true);
+            app.RUN_COMPARATORButton.Position = [17.5 37 132 38];
+            app.RUN_COMPARATORButton.Text = 'RUN_COMPARATOR';
+
+            % Create Threshold_ValueEditFieldLabel
+            app.Threshold_ValueEditFieldLabel = uilabel(app.COMPARATOR_SETTINGSTab);
+            app.Threshold_ValueEditFieldLabel.HorizontalAlignment = 'right';
+            app.Threshold_ValueEditFieldLabel.Position = [170 43 95 22];
+            app.Threshold_ValueEditFieldLabel.Text = 'Threshold_Value';
+
+            % Create Threshold_ValueEditField
+            app.Threshold_ValueEditField = uieditfield(app.COMPARATOR_SETTINGSTab, 'numeric');
+            app.Threshold_ValueEditField.Position = [280 43 100 22];
+
+            % Create RUN_SCHMITT_TRIGGERButton
+            app.RUN_SCHMITT_TRIGGERButton = uibutton(app.NOISE_TRIGGERINGTab, 'push');
+            app.RUN_SCHMITT_TRIGGERButton.ButtonPushedFcn = createCallbackFcn(app, @RUN_SCHMITT_TRIGGERButtonPushed, true);
+            app.RUN_SCHMITT_TRIGGERButton.Position = [13 18 167 30];
+            app.RUN_SCHMITT_TRIGGERButton.Text = 'RUN_SCHMITT_TRIGGER';
+
+            % Create Image2
+            app.Image2 = uiimage(app.NOISE_TRIGGERINGTab);
+            app.Image2.Position = [13 240 371 121];
+            app.Image2.ImageSource = 'comparator.png';
+
+            % Create Image3
+            app.Image3 = uiimage(app.NOISE_TRIGGERINGTab);
+            app.Image3.Position = [50 77 309 125];
+            app.Image3.ImageSource = 'Scht.png';
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = Schimitt_Trigger
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
